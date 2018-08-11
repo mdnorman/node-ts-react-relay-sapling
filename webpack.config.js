@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const RelayCompilerWebpackPlugin = require('relay-compiler-webpack-plugin');
 const webpack = require('webpack');
 
 const webpackConfig = {
@@ -19,7 +20,14 @@ const webpackConfig = {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 
-  plugins: [new HtmlWebpackPlugin({ template: 'src/index.html.ejs' }), new webpack.HotModuleReplacementPlugin()],
+  plugins: [
+    new HtmlWebpackPlugin({ template: 'src/index.html.ejs' }),
+    new webpack.HotModuleReplacementPlugin(),
+    new RelayCompilerWebpackPlugin({
+      schema: path.resolve(__dirname, './schema.graphql'),
+      src: path.resolve(__dirname, './src'),
+    }),
+  ],
 
   module: {
     rules: [
