@@ -3,65 +3,92 @@ const path = require('path');
 const RelayCompilerWebpackPlugin = require('relay-compiler-webpack-plugin');
 const webpack = require('webpack');
 
-const webpackConfig = {
-  entry: './src/index.tsx',
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, './dist'),
-    publicPath: '/',
-  },
+const webpackConfig = (env, argv) => {
+  const { mode } = env;
+  const production = mode === 'production';
+  const development = !production;
+  const filename = production ? '[name].[chunkhash].bundle.js' : '[name].[hash].bundle.js';
 
-  devtool: 'source-map',
-  devServer: {
-    contentBase: './dist',
-    hot: true,
-  },
+  console.log(env);
 
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
-  },
-
-  plugins: [
+  const plugins = [
     new HtmlWebpackPlugin({ template: 'src/index.html.ejs' }),
-    new webpack.HotModuleReplacementPlugin(),
     new RelayCompilerWebpackPlugin({
       schema: path.resolve(__dirname, './schema.graphql'),
       src: path.resolve(__dirname, './src'),
     }),
-  ],
+  ];
 
-  module: {
-    rules: [
-      { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
-      { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-            },
+  if (development) {
+    plugins.push(new webpack.HotModuleReplacementPlugin());
+  }
+
+  return {
+    entry: './src/index.tsx',
+    output: {
+      filename,
+      path: path.resolve(__dirname, './dist'),
+      publicPath: '/',
+    },
+
+    devtool: 'source-map',
+    devServer: {
+      contentBase: './dist',
+      hot: true,
+    },
+
+    resolve: {
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    },
+
+    plugins,
+
+    optimization: {
+      runtimeChunk: 'single',
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            test: /\/node_modules\//,
+            name: 'vendors',
+            chunks: 'all',
           },
-        ],
+        },
       },
-      {
-        test: /\.scss$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
+    },
+
+    module: {
+      rules: [
+        { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
+        { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                sourceMap: true,
+              },
             },
-          },
-          'resolve-url-loader',
-          'sass-loader?sourceMap',
-        ],
-      },
-    ],
-  },
+          ],
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                sourceMap: true,
+              },
+            },
+            'resolve-url-loader',
+            'sass-loader?sourceMap',
+          ],
+        },
+      ],
+    },
+  };
 };
 
 module.exports = webpackConfig;
