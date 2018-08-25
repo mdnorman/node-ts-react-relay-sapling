@@ -9,8 +9,6 @@ const webpackConfig = (env, argv) => {
   const development = !production;
   const filename = production ? '[name].[chunkhash].bundle.js' : '[name].[hash].bundle.js';
 
-  console.log(env);
-
   const plugins = [
     new HtmlWebpackPlugin({ template: 'src/index.html.ejs' }),
     new RelayCompilerWebpackPlugin({
