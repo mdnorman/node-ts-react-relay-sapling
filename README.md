@@ -20,7 +20,39 @@ See `.editorconfig` for settings.
 
 Many popular IDEs and editors support this out of the box or with a plugin.
 
+### GraphQL Server
+
+This project assumes that there is a separate GraphQL server running for the backend.
+
+The server configuration assumes that the GraphQL server is running on [http://localhost:3000/graphql].
+
+The GraphQL server port can be changed by setting the environment variable `GRAPHQL_PORT` to an open port.
+
+The GraphQL server URL can be wholly changed by setting the environment variable `GRAPHQL_URL` to a valid URL.
+
+In addition, the `fetch-schema` command will use these environment variables if set
+
 ## Development
+
+### Updating `schema.graphql`
+
+```
+npm run fetch-schema
+```
+
+### Compiling Relay
+
+One time:
+
+```
+npm run relay
+```
+
+Watch files and continually compile changes:
+
+```
+npm run relay:watch
+```
 
 ### Running the Local Server
 
@@ -86,6 +118,7 @@ npm run build:development
 npm run build
 ```
 
+[http://localhost:3000/graphql]: http://localhost:3000/graphql
 [http://localhost:5000/]: http://localhost:5000/
 [editorconfig]: https://editorconfig.org/
 [jasmine]: https://jasmine.github.io/
