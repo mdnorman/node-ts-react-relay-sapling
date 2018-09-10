@@ -35,6 +35,13 @@ custom:
   logs:
     bucket: CHANGEME
     path: websites/${self:service.name}/${self:custom.stage}/cloudfront
+  graphql:
+    path: /graphql
+    domainName: ${self:custom.graphql.domainNameStage.${self:custom.stage}}
+    domainNameStage:
+      test: test-api.${self:custom.graphql.baseDomainName}
+      prod: api.${self:custom.graphql.baseDomainName}
+    baseDomainName: ${self:custom.baseDomainName}
 
 
 resources:
@@ -54,6 +61,13 @@ resources:
             - DomainName: ${self:custom.client.bucketName}.s3.amazonaws.com
               ## An identifier for the origin which must be unique within the distribution
               Id: WebApp
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+            - DomainName: ${self:custom.graphql.domainName}
+              OriginPath: ${self:custom.graphql.path}
+              Id: GraphQL
               CustomOriginConfig:
                 HTTPPort: 80
                 HTTPSPort: 443
@@ -89,6 +103,27 @@ resources:
                 Forward: none
             ## The protocol that users can use to access the files in the origin. To allow HTTP use `allow-all`
             ViewerProtocolPolicy: redirect-to-https
+          CacheBehaviors:
+            - PathPattern: /graphql
+              AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+              ## The origin id defined above
+              TargetOriginId: GraphQL
+              ## Defining if and how the QueryString and Cookies are forwarded to the origin which in this case is S3
+              ForwardedValues:
+                QueryString: true
+                Headers:
+                  - '*'
+                Cookies:
+                  Forward: all
+              ## The protocol that users can use to access the files in the origin. To allow HTTP use `allow-all`
+              ViewerProtocolPolicy: redirect-to-https
           ## The certificate to use when viewers use HTTPS to request objects.
           ViewerCertificate:
             AcmCertificateArn:
