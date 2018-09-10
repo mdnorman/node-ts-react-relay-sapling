@@ -114,8 +114,6 @@ resources:
               ## Defining if and how the QueryString and Cookies are forwarded to the origin which in this case is S3
               ForwardedValues:
                 QueryString: true
-                Headers:
-                  - '*'
                 Cookies:
                   Forward: all
               ## The protocol that users can use to access the files in the origin. To allow HTTP use `allow-all`
